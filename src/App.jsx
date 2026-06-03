@@ -176,9 +176,9 @@ export default function App() {
             style={{ padding:'8px 14px', borderRadius:8, border:'none', cursor:'pointer', fontWeight:700, fontSize:12, background: view==='saisie' ? C.accent : '#0a1e30', color: view==='saisie' ? '#fff' : C.muted }}>
             ✏️ Saisie
           </button>
-          <button onClick={() => subscription?.active ? setView('fiche') : setPayModal(true)}
+          <button onClick={() => setView('fiche') }
             style={{ padding:'8px 14px', borderRadius:8, border:'none', cursor:'pointer', fontWeight:700, fontSize:12, background: view==='fiche' ? C.green : '#0a1e30', color: view==='fiche' ? '#0f172a' : C.muted }}>
-            📊 Fiche {!subscription?.active && '🔒 100F'}
+            📊 Fiche Statistique
           </button>
           <button onClick={() => { localStorage.removeItem('bepc_token'); setToken(null); setView('login') }}
             style={{ padding:'8px 14px', borderRadius:8, border:`1px solid ${C.red}`, cursor:'pointer', fontWeight:700, fontSize:12, background:'transparent', color:C.red }}>
@@ -370,40 +370,7 @@ style={{ padding:'8px 14px', borderRadius:8, border:'1px solid #22d3ee', cursor:
         </div>
       )}
 
-      {payModal && (
-        <div style={{ position:'fixed', inset:0, background:'#00000099', zIndex:999, display:'flex', alignItems:'center', justifyContent:'center', padding:16 }}>
-          <div style={{ background:C.card, borderRadius:16, padding:28, maxWidth:480, width:'100%', border:`1px solid ${C.border}` }}>
-            <div style={{ fontWeight:900, fontSize:16, color:C.text, marginBottom:20 }}>💳 Paiement Wave — 100 FCFA</div>
-            {payStep === 'form' && (
-              <>
-                <div style={{ background:'#0a1f0a', border:'1px solid #166534', borderRadius:10, padding:16, marginBottom:16 }}>
-                  <div style={{ color:C.green, fontWeight:800, fontSize:14, marginBottom:8 }}>🌊 Paiement Wave Mobile Money</div>
-                  <div style={{ background:'#052e16', borderRadius:8, padding:'10px 14px', marginBottom:10, textAlign:'center' }}>
-                    <div style={{ fontSize:11, color:'#86efac', marginBottom:4 }}>Montant à payer</div>
-                    <div style={{ fontSize:32, fontWeight:900, color:C.green }}>100 <span style={{ fontSize:16 }}>FCFA</span></div>
-                    <div style={{ fontSize:11, color:'#6ee7b7', marginTop:2 }}>Accès illimité 6 mois</div>
-                  </div>
-                  <div style={{ color:'#86efac', fontSize:12, lineHeight:1.8 }}>
-                    Entrez votre numéro Wave ci-dessous. Vous recevrez une notification pour confirmer le paiement de <strong>100 FCFA</strong>.
-                  </div>
-                </div>
-                <div style={{ marginBottom:14 }}>
-                  <label style={{ fontSize:11, color:C.muted, fontWeight:700, display:'block', marginBottom:5 }}>VOTRE NUMÉRO WAVE</label>
-                  <input value={payPhone} onChange={e => setPayPhone(e.target.value)} placeholder="Ex: 07 XX XX XX XX" style={inp} />
-                </div>
-                {payError && <div style={{ color:C.red, fontSize:12, marginBottom:10 }}>{payError}</div>}
-                <div style={{ display:'flex', gap:10 }}>
-                  <button onClick={() => setPayModal(false)}
-                    style={{ flex:1, padding:'11px 0', borderRadius:10, border:`1px solid ${C.border}`, background:'transparent', color:C.muted, fontWeight:700, cursor:'pointer' }}>
-                    Annuler
-                  </button>
-                  <button onClick={handlePayment} disabled={payLoading || !payPhone.trim()}
-                    style={{ flex:2, padding:'11px 0', borderRadius:10, border:'none', background: payLoading ? C.border : C.green, color:'#0f172a', fontWeight:900, fontSize:14, cursor: payLoading ? 'not-allowed':'pointer' }}>
-                    {payLoading ? '⏳ Envoi...' : 'Payer 100 FCFA →'}
-                  </button>
-                </div>
-              </>
-            )}
+      
             {payStep === 'waiting' && (
               <div style={{ textAlign:'center', padding:'24px 0' }}>
                 <div style={{ fontSize:40, marginBottom:12 }}>⏳</div>
