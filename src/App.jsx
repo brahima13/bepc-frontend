@@ -130,16 +130,28 @@ export default function App() {
           <div style={{ fontSize:18, fontWeight:900, color:C.accent }}>BEPC 2026 — Stats Notes</div>
         </div>
         <div style={{ display:'flex', gap:8, alignItems:'center', flexWrap:'wrap' }}>
-          <button onClick={() => document.getElementById('scanInput').click()}
-            style={{ padding:'8px 14px', borderRadius:8, border:'none', cursor:'pointer', fontWeight:700, fontSize:12, background:'#8b5cf6', color:'#fff' }}>
-            📸 Scanner
-          </button>
-          <input id="scanInput" type="file" accept="image/*" capture="environment" style={{ display:'none' }}
-            onChange={async (e) => {
-              const file = e.target.files?.[0]
-              if (!file) return
-              alert('Photo reçue ! Fonction IA disponible prochainement.')
-            }}
+          <button onClick={() => document.getElementById('scanGalerie').click()}
+  style={{ padding:'8px 14px', borderRadius:8, border:'none', cursor:'pointer', fontWeight:700, fontSize:12, background:'#8b5cf6', color:'#fff' }}>
+  🖼️ Galerie
+</button>
+<button onClick={() => document.getElementById('scanCamera').click()}
+  style={{ padding:'8px 14px', borderRadius:8, border:'none', cursor:'pointer', fontWeight:700, fontSize:12, background:'#6d28d9', color:'#fff' }}>
+  📷 Caméra
+</button>
+<input id="scanGalerie" type="file" accept="image/*" style={{ display:'none' }}
+  onChange={(e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    alert('Photo importée ! Fonction extraction IA disponible prochainement.')
+  }}
+/>
+<input id="scanCamera" type="file" accept="image/*" capture="environment" style={{ display:'none' }}
+  onChange={(e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    alert('Photo prise ! Fonction extraction IA disponible prochainement.')
+  }}
+/>
           />
           <button onClick={() => setView('saisie')}
             style={{ padding:'8px 14px', borderRadius:8, border:'none', cursor:'pointer', fontWeight:700, fontSize:12, background: view==='saisie' ? C.accent : '#0a1e30', color: view==='saisie' ? '#fff' : C.muted }}>
