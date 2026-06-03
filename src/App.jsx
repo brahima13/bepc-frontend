@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { register, login, checkSubscription, initiatePayment, checkPaymentStatus } from './api.js'
+import { register, login, checkSubscription } from './api.js'
 
 const NOTES = Array.from({ length: 21 }, (_, i) => i)
 const DAY_LABELS = ['1er jour', '2ème jour', '3ème jour', '4ème jour']
@@ -17,25 +17,17 @@ const pv = v => { const n = parseInt(v, 10); return isNaN(n) || n < 0 ? 0 : n }
 export default function App() {
   const [view, setView] = useState('login')
   const [token, setToken] = useState(localStorage.getItem('bepc_token'))
-  const [subscription, setSubscription] = useState(null)
   const [form, setForm] = useState(emptyForm())
   const [activeDay, setActiveDay] = useState(0)
   const [activeSession, setActiveSession] = useState('matin')
   const [authForm, setAuthForm] = useState({ name: '', phone: '', password: '' })
   const [authError, setAuthError] = useState('')
   const [authLoading, setAuthLoading] = useState(false)
-  const [payModal, setPayModal] = useState(false)
-  const [payPhone, setPayPhone] = useState('')
-  const [payLoading, setPayLoading] = useState(false)
-  const [payError, setPayError] = useState('')
-  const [payStep, setPayStep] = useState('form')
 
   useEffect(() => {
     if (token) {
       localStorage.setItem('bepc_token', token)
-      checkSubscription()
-        .then(r => { setSubscription(r.data); setView('saisie') })
-        .catch(() => setView('saisie'))
+      setView('saisie')
     }
   }, [token])
 
@@ -66,29 +58,6 @@ export default function App() {
       setAuthError(e.response?.data?.error || 'Erreur de connexion')
     } finally {
       setAuthLoading(false)
-    }
-  }
-
-  const handlePayment = async () => {
-    setPayLoading(true)
-    setPayError('')
-    try {
-      const res = await initiatePayment({ wavePhone: payPhone })
-      setPayStep('waiting')
-      const interval = setInterval(async () => {
-        try {
-          const status = await checkPaymentStatus(res.data.token)
-          if (status.data.status === 'paid') {
-            clearInterval(interval)
-            setSubscription({ active: true, expiresAt: status.data.expiresAt })
-            setPayStep('done')
-          }
-        } catch (e) { clearInterval(interval) }
-      }, 5000)
-    } catch (e) {
-      setPayError(e.response?.data?.error || 'Erreur paiement')
-    } finally {
-      setPayLoading(false)
     }
   }
 
@@ -162,21 +131,21 @@ export default function App() {
         </div>
         <div style={{ display:'flex', gap:8, alignItems:'center', flexWrap:'wrap' }}>
           <button onClick={() => document.getElementById('scanInput').click()}
-  style={{ padding:'8px 14px', borderRadius:8, border:'none', cursor:'pointer', fontWeight:700, fontSize:12, background:'#8b5cf6', color:'#fff' }}>
-  📸 Scanner
-</button>
-<input id="scanInput" type="file" accept="image/*" capture="environment" style={{ display:'none' }}
-  onChange={async (e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    alert('📸 Photo reçue ! Saisie manuelle pour le moment - scan IA disponible après déploiement backend.')
-  }}
-/>
+            style={{ padding:'8px 14px', borderRadius:8, border:'none', cursor:'pointer', fontWeight:700, fontSize:12, background:'#8b5cf6', color:'#fff' }}>
+            📸 Scanner
+          </button>
+          <input id="scanInput" type="file" accept="image/*" capture="environment" style={{ display:'none' }}
+            onChange={async (e) => {
+              const file = e.target.files?.[0]
+              if (!file) return
+              alert('Photo reçue ! Fonction IA disponible prochainement.')
+            }}
+          />
           <button onClick={() => setView('saisie')}
             style={{ padding:'8px 14px', borderRadius:8, border:'none', cursor:'pointer', fontWeight:700, fontSize:12, background: view==='saisie' ? C.accent : '#0a1e30', color: view==='saisie' ? '#fff' : C.muted }}>
             ✏️ Saisie
           </button>
-          <button onClick={() => setView('fiche') }
+          <button onClick={() => setView('fiche')}
             style={{ padding:'8px 14px', borderRadius:8, border:'none', cursor:'pointer', fontWeight:700, fontSize:12, background: view==='fiche' ? C.green : '#0a1e30', color: view==='fiche' ? '#0f172a' : C.muted }}>
             📊 Fiche Statistique
           </button>
@@ -185,18 +154,17 @@ export default function App() {
             Déconnexion
           </button>
           <button onClick={async () => {
-  if (window.deferredPrompt) {
-    window.deferredPrompt.prompt();
-    await window.deferredPrompt.userChoice;
-    window.deferredPrompt = null;
-  } else {
-    alert('Pour installer : Menu du navigateur → "Ajouter à l\'écran d\'accueil"');
-  }
-}}
-style={{ padding:'8px 14px', borderRadius:8, border:'1px solid #22d3ee', cursor:'pointer', fontWeight:700, fontSize:12, background:'transparent', color:'#22d3ee' }}>
-  📲 Installer
-</button>
-          {subscription?.active && <div style={{ fontSize:11, color:C.green }}>✅ Abonné</div>}
+            if (window.deferredPrompt) {
+              window.deferredPrompt.prompt()
+              await window.deferredPrompt.userChoice
+              window.deferredPrompt = null
+            } else {
+              alert('Pour installer : Menu du navigateur puis Ajouter à l\'écran d\'accueil')
+            }
+          }}
+            style={{ padding:'8px 14px', borderRadius:8, border:`1px solid ${C.accent}`, cursor:'pointer', fontWeight:700, fontSize:12, background:'transparent', color:C.accent }}>
+            📲 Installer
+          </button>
         </div>
       </header>
 
@@ -205,7 +173,7 @@ style={{ padding:'8px 14px', borderRadius:8, border:'1px solid #22d3ee', cursor:
           <div style={{ background:C.card, borderRadius:14, padding:22, marginBottom:18, border:`1px solid ${C.border}` }}>
             <div style={{ fontSize:12, color:C.accent, fontWeight:800, letterSpacing:2, textTransform:'uppercase', marginBottom:16 }}>📋 Informations Générales</div>
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
-              {[['discipline','Discipline'],['ccd','C.C.D'],['orena','ORENA du CCD'],['absents','Candidats absents'],
+              {[['discipline','Discipline'],['ccd','C.C.D'],['drena','DRENA du CCD'],['absents','Candidats absents'],
                 ['correcteur','Nom du correcteur'],['harmonisateur','Nom harmonisateur'],
                 ['contactCorrecteur','Contact correcteur'],['contactHarmonisateur','Contact harmonisateur']
               ].map(([k,l]) => (
@@ -255,7 +223,7 @@ style={{ padding:'8px 14px', borderRadius:8, border:'1px solid #22d3ee', cursor:
           </div>
 
           <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:14 }}>
-            {[[`Total copies`, stats.grandTotal, C.accent],[`Absents`, pv(form.absents), C.yellow],[`Moyenne`, `${stats.moyenne}/20`, C.green]].map(([l,v,c]) => (
+            {[['Total copies', stats.grandTotal, C.accent],['Absents', pv(form.absents), C.yellow],['Moyenne', `${stats.moyenne}/20`, C.green]].map(([l,v,c]) => (
               <div key={l} style={{ background:C.card, borderRadius:12, padding:'16px 18px', border:`1px solid ${c}33` }}>
                 <div style={{ fontSize:10, color:C.muted, fontWeight:700, textTransform:'uppercase', marginBottom:6 }}>{l}</div>
                 <div style={{ fontSize:24, fontWeight:900, color:c }}>{v}</div>
@@ -265,7 +233,7 @@ style={{ padding:'8px 14px', borderRadius:8, border:'1px solid #22d3ee', cursor:
         </div>
       )}
 
-      {view === 'fiche' && subscription?.active && (
+      {view === 'fiche' && (
         <div style={{ maxWidth:1000, margin:'0 auto', padding:'20px 14px' }}>
           <div style={{ textAlign:'right', marginBottom:14 }}>
             <button onClick={() => window.print()}
@@ -297,7 +265,7 @@ style={{ padding:'8px 14px', borderRadius:8, border:'1px solid #22d3ee', cursor:
               <div><strong>Discipline :</strong> <u>{form.discipline}</u></div>
               <div style={{ display:'flex', gap:32 }}>
                 <div><strong>C.C.D :</strong> <u>{form.ccd}</u></div>
-                <div><strong>DRENA DU CCD :</strong> <u>{form.orena}</u></div>
+                <div><strong>DRENA DU CCD :</strong> <u>{form.drena}</u></div>
               </div>
               <div style={{ display:'flex', gap:32 }}>
                 <div><strong>Correcteur :</strong> <u>{form.correcteur}</u></div>
@@ -366,33 +334,6 @@ style={{ padding:'8px 14px', borderRadius:8, border:'1px solid #22d3ee', cursor:
             <div style={{ marginTop:10, fontSize:8, color:'#9ca3af', textAlign:'center', borderTop:'1px solid #e5e7eb', paddingTop:8 }}>
               BP V 276 ABIDJAN ** Tél : 27 20 32 00 74 ** Site web : www.men-deco.org
             </div>
-          </div>
-        </div>
-      )}
-
-      
-            {payStep === 'waiting' && (
-              <div style={{ textAlign:'center', padding:'24px 0' }}>
-                <div style={{ fontSize:40, marginBottom:12 }}>⏳</div>
-                <div style={{ fontWeight:800, fontSize:16, color:C.yellow, marginBottom:8 }}>En attente de confirmation...</div>
-                <div style={{ color:C.muted, fontSize:13 }}>
-                  Vérifiez votre téléphone Wave et confirmez le paiement de <strong style={{ color:C.text }}>100 FCFA</strong>
-                </div>
-              </div>
-            )}
-            {payStep === 'done' && (
-              <div style={{ textAlign:'center', padding:'24px 0' }}>
-                <div style={{ fontSize:48, marginBottom:12 }}>🎉</div>
-                <div style={{ fontWeight:900, fontSize:18, color:C.green, marginBottom:8 }}>Paiement confirmé !</div>
-                <div style={{ color:C.muted, fontSize:13, marginBottom:20 }}>
-                  Votre abonnement de <strong style={{ color:C.text }}>6 mois</strong> est activé.
-                </div>
-                <button onClick={() => { setPayModal(false); setView('fiche') }}
-                  style={{ padding:'12px 28px', borderRadius:10, border:'none', background:C.green, color:'#0f172a', fontWeight:900, fontSize:14, cursor:'pointer' }}>
-                  📊 Voir la fiche statistique →
-                </button>
-              </div>
-            )}
           </div>
         </div>
       )}
