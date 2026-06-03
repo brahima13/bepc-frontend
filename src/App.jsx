@@ -184,6 +184,18 @@ export default function App() {
             style={{ padding:'8px 14px', borderRadius:8, border:`1px solid ${C.red}`, cursor:'pointer', fontWeight:700, fontSize:12, background:'transparent', color:C.red }}>
             Déconnexion
           </button>
+          <button onClick={async () => {
+  if (window.deferredPrompt) {
+    window.deferredPrompt.prompt();
+    await window.deferredPrompt.userChoice;
+    window.deferredPrompt = null;
+  } else {
+    alert('Pour installer : Menu du navigateur → "Ajouter à l\'écran d\'accueil"');
+  }
+}}
+style={{ padding:'8px 14px', borderRadius:8, border:'1px solid #22d3ee', cursor:'pointer', fontWeight:700, fontSize:12, background:'transparent', color:'#22d3ee' }}>
+  📲 Installer
+</button>
           {subscription?.active && <div style={{ fontSize:11, color:C.green }}>✅ Abonné</div>}
         </div>
       </header>
