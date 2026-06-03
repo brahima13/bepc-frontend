@@ -8,10 +8,16 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   </React.StrictMode>
 )
 
-// PWA Install
-let deferredPrompt;
+// PWA Install automatique
 window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  window.deferredPrompt = e;
-});
+  e.preventDefault()
+  window.deferredPrompt = e
+  // Afficher automatiquement après 3 secondes
+  setTimeout(async () => {
+    if (window.deferredPrompt) {
+      window.deferredPrompt.prompt()
+      const choice = await window.deferredPrompt.userChoice
+      window.deferredPrompt = null
+    }
+  }, 3000)
+})
