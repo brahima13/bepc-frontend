@@ -8,7 +8,7 @@ const emptyDay = () => ({
   soir: Object.fromEntries(NOTES.map(n => [n, '']))
 })
 const emptyForm = () => ({
-  discipline: '', ccd: '', orena: '', correcteur: '',
+  discipline: '', ccd: '', drena: '', correcteur: '',
   harmonisateur: '', contactCorrecteur: '', contactHarmonisateur: '', absents: '',
   days: [emptyDay(), emptyDay(), emptyDay(), emptyDay()]
 })
