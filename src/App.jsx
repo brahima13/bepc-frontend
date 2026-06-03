@@ -285,7 +285,7 @@ export default function App() {
               <div><strong>Discipline :</strong> <u>{form.discipline}</u></div>
               <div style={{ display:'flex', gap:32 }}>
                 <div><strong>C.C.D :</strong> <u>{form.ccd}</u></div>
-                <div><strong>ORENA DU CCD :</strong> <u>{form.orena}</u></div>
+                <div><strong>DRENA DU CCD :</strong> <u>{form.orena}</u></div>
               </div>
               <div style={{ display:'flex', gap:32 }}>
                 <div><strong>Correcteur :</strong> <u>{form.correcteur}</u></div>
